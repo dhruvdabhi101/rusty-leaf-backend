@@ -1,8 +1,12 @@
 use crate::models::user_model::User;
 use dotenv::dotenv;
-use mongodb::{sync::{Client, Collection}, results::InsertOneResult, bson::{oid::ObjectId, doc}};
-use std::env;
 use mongodb::bson::extjson::de::Error;
+use mongodb::{
+    bson::{doc, oid::ObjectId},
+    results::InsertOneResult,
+    sync::{Client, Collection},
+};
+use std::env;
 
 pub struct MongoRepo {
     col: Collection<User>,
@@ -21,17 +25,21 @@ impl MongoRepo {
         MongoRepo { col }
     }
 
-    pub fn create_user(&self, new_user: User) -> Result<InsertOneResult,Error> {
+    pub fn create_user(&self, new_user: User) -> Result<InsertOneResult, Error> {
         let new_doc = User {
             username: new_user.username,
             password: new_user.password,
             email: new_user.email,
             name: new_user.name,
         };
-        let user = self.col.insert_one(new_doc, None).ok().expect("Error Creating User");
+        let user = self
+            .col
+            .insert_one(new_doc, None)
+            .ok()
+            .expect("Error Creating User");
         Ok(user)
     }
-    pub fn get_user(&self, username: String) -> Result<User,Error> {
+    pub fn get_user(&self, username: String) -> Result<User, Error> {
         let obj_id = ObjectId::parse_str(username).unwrap();
         let filter = doc! {"_id": obj_id};
         let user_detail = self

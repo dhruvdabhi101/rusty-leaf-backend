@@ -1,7 +1,7 @@
 use mongodb::results::InsertOneResult;
-use rocket::{serde::json::Json, http::Status, State, post, get};
+use rocket::{get, http::Status, post, serde::json::Json, State};
 
-use crate::{repository::mongodb_repo::MongoRepo, models::user_model::User};
+use crate::{models::user_model::User, repository::mongodb_repo::MongoRepo};
 
 #[post("/user", data = "<new_user>")]
 pub fn create_user(
@@ -22,10 +22,7 @@ pub fn create_user(
 }
 
 #[get("/user/<path>")]
-pub fn get_user(
-    db: &State<MongoRepo>,
-    path:String 
-    ) ->  Result<Json<User>, Status> {
+pub fn get_user(db: &State<MongoRepo>, path: String) -> Result<Json<User>, Status> {
     let id = path;
     if id.is_empty() {
         return Err(Status::BadRequest);
