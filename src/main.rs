@@ -1,13 +1,18 @@
-use rocket::{get, routes};
+pub mod models;
+pub mod api;
+pub mod repository;
+use api::user_api::{create_user, get_user};
+use repository::mongodb_repo::MongoRepo;
+use rocket::{get, routes, http::Status, serde::json::Json};
 
 #[get("/")]
-fn index() -> &'static str {
-    "Hello, world!"
+fn index() -> Result<Json<String>, Status> {
+    Ok(Json(String::from("Hello from rust and mongodb")))
 }
 
 #[shuttle_runtime::main]
 async fn main() -> shuttle_rocket::ShuttleRocket {
-    let rocket = rocket::build().mount("/", routes![index]);
-
+    let db = MongoRepo::init();
+    let rocket = rocket::build().manage(db).mount("/", routes![index, create_user, get_user]);
     Ok(rocket.into())
 }
