@@ -1,4 +1,4 @@
-use crate::models::user_model::User;
+use crate::models::user_model::{User, UserFromMongo};
 use dotenv::dotenv;
 use mongodb::bson::extjson::de::Error;
 use mongodb::{
@@ -9,7 +9,7 @@ use mongodb::{
 use std::env;
 
 pub struct MongoRepo {
-    col: Collection<User>,
+    col: Collection<UserFromMongo>,
 }
 
 impl MongoRepo {
@@ -21,12 +21,13 @@ impl MongoRepo {
         };
         let client = Client::with_uri_str(uri).unwrap();
         let db = client.database("rusty-leaf");
-        let col: Collection<User> = db.collection("user");
+        let col: Collection<UserFromMongo> = db.collection("user");
         MongoRepo { col }
     }
 
     pub fn create_user(&self, new_user: User) -> Result<InsertOneResult, Error> {
-        let new_doc = User {
+        let new_doc = UserFromMongo {
+            _id: ObjectId::new(),
             username: new_user.username,
             password: new_user.password,
             email: new_user.email,
@@ -39,7 +40,7 @@ impl MongoRepo {
             .expect("Error Creating User");
         Ok(user)
     }
-    pub fn get_user(&self, username: &str) -> Result<User, Error> {
+    pub fn get_user(&self, username: &str) -> Result<UserFromMongo, Error> {
         let filter = doc! {"username": username};
         let user_detail = self
             .col
@@ -48,7 +49,7 @@ impl MongoRepo {
             .expect("Error Finding User");
         Ok(user_detail.expect("User not found"))
     }
-    pub fn login(&self, username: &str, password: &str) -> Result<User, Error> {
+    pub fn login(&self, username: &str, password: &str) -> Result<UserFromMongo, Error> {
         let filter = doc! {"username": username, "password": password};
         let user_detail = self
             .col

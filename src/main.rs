@@ -2,7 +2,7 @@ pub mod api;
 pub mod config;
 pub mod models;
 pub mod repository;
-use api::user_api::{create_user, get_user};
+use api::user_api::{create_user, get_user, login};
 use repository::mongodb_repo::MongoRepo;
 use rocket::{get, http::Status, routes, serde::json::Json};
 
@@ -16,6 +16,6 @@ async fn main() -> shuttle_rocket::ShuttleRocket {
     let db = MongoRepo::init();
     let rocket = rocket::build()
         .manage(db)
-        .mount("/", routes![index, create_user, get_user]);
+        .mount("/", routes![index, create_user, get_user,login]);
     Ok(rocket.into())
 }

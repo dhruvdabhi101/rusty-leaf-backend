@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+bson = "2.8.1"
 chrono = "0.4.31"
 dotenv = "0.15.0"
 jsonwebtoken = "9.2.0"

@@ -2466,6 +2466,7 @@ checksum = "7ffc183a10b4478d04cbbbfc96d0873219d962dd5accaff2ffbd4ceb7df837f4"
 name = "rusty-leaf-backend"
 version = "0.1.0"
 dependencies = [
+ "bson",
  "chrono",
  "dotenv",
  "jsonwebtoken",
