@@ -1,6 +1,7 @@
 pub mod api;
 pub mod models;
 pub mod repository;
+pub mod config;
 use api::user_api::{create_user, get_user};
 use repository::mongodb_repo::MongoRepo;
 use rocket::{get, http::Status, routes, serde::json::Json};

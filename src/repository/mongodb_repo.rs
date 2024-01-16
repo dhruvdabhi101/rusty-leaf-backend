@@ -39,9 +39,17 @@ impl MongoRepo {
             .expect("Error Creating User");
         Ok(user)
     }
-    pub fn get_user(&self, username: String) -> Result<User, Error> {
-        let obj_id = ObjectId::parse_str(username).unwrap();
-        let filter = doc! {"_id": obj_id};
+    pub fn get_user(&self, username: &str) -> Result<User, Error> {
+        let filter = doc! {"username": username};
+        let user_detail = self
+            .col
+            .find_one(filter, None)
+            .ok()
+            .expect("Error Finding User");
+        Ok(user_detail.expect("User not found"))
+    }
+    pub fn login(&self, username: &str, password: &str) -> Result<User, Error> {
+        let filter = doc! {"username": username, "password": password};
         let user_detail = self
             .col
             .find_one(filter, None)

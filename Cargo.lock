@@ -523,8 +523,10 @@ checksum = "7f2c685bad3eb3d45a01354cedb7d5faa66194d1d58ba6e267a8de788f79db38"
 dependencies = [
  "android-tzdata",
  "iana-time-zone",
+ "js-sys",
  "num-traits",
  "serde",
+ "wasm-bindgen",
  "windows-targets 0.48.5",
 ]
 
@@ -2464,7 +2466,9 @@ checksum = "7ffc183a10b4478d04cbbbfc96d0873219d962dd5accaff2ffbd4ceb7df837f4"
 name = "rusty-leaf-backend"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "dotenv",
+ "jsonwebtoken",
  "mongodb",
  "rocket",
  "serde",
