@@ -1,5 +1,4 @@
-
-pub const SECRET:&str = "secrets";
+pub const SECRET: &str = "secrets";
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct Claims {

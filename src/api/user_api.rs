@@ -1,7 +1,10 @@
 use mongodb::results::InsertOneResult;
 use rocket::{get, http::Status, post, serde::json::Json, State};
 
-use crate::{models::user_model::{User, LoginUser, LoginResponse}, repository::mongodb_repo::MongoRepo};
+use crate::{
+    models::user_model::{LoginResponse, LoginUser, User},
+    repository::mongodb_repo::MongoRepo,
+};
 
 #[post("/user", data = "<new_user>")]
 pub fn create_user(
@@ -50,9 +53,6 @@ pub fn login(db: &State<MongoRepo>, user: Json<LoginUser>) -> Result<Json<LoginR
                 email: user.email,
                 name: user.name,
             },
-            
         }))
-
     }
-
 }

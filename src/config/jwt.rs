@@ -1,5 +1,7 @@
-use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation, errors::Error};
-use chrono::{Utc, Duration};
+use chrono::{Duration, Utc};
+use jsonwebtoken::{
+    decode, encode, errors::Error, Algorithm, DecodingKey, EncodingKey, Header, Validation,
+};
 
 use super::auth::{Claims, SECRET};
 
