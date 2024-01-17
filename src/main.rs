@@ -4,7 +4,7 @@ pub mod models;
 pub mod repository;
 use api::user_api::{create_user, get_user, login};
 use repository::mongodb_repo::MongoRepo;
-use rocket::{get, http::Status, routes, serde::json::Json};
+use rocket::{get, http::Status, routes, serde::json::Json, Rocket};
 
 #[get("/")]
 fn index() -> Result<Json<String>, Status> {
@@ -13,8 +13,8 @@ fn index() -> Result<Json<String>, Status> {
 
 #[shuttle_runtime::main]
 async fn main() -> shuttle_rocket::ShuttleRocket {
-    let db = MongoRepo::init();
-    let rocket = rocket::build()
+    let db: MongoRepo = MongoRepo::init();
+    let rocket: Rocket<rocket::Build> = rocket::build()
         .manage(db)
         .mount("/", routes![index, create_user, get_user,login]);
     Ok(rocket.into())

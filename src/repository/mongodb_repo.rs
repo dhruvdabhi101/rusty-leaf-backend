@@ -26,6 +26,7 @@ impl MongoRepo {
     }
 
     pub fn create_user(&self, new_user: User) -> Result<InsertOneResult, Error> {
+        //TODO: hash password
         let new_doc = UserFromMongo {
             _id: ObjectId::new(),
             username: new_user.username,
@@ -51,6 +52,7 @@ impl MongoRepo {
     }
     pub fn login(&self, username: &str, password: &str) -> Result<UserFromMongo, Error> {
         let filter = doc! {"username": username, "password": password};
+        //TODO: check password hashing
         let user_detail = self
             .col
             .find_one(filter, None)

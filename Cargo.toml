@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 bson = "2.8.1"
 chrono = "0.4.31"
+darkdown = "0.1.4"
 dotenv = "0.15.0"
 jsonwebtoken = "9.2.0"
 rocket = {version = "0.5.0", features = ["json"]}
