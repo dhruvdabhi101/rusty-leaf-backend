@@ -16,6 +16,6 @@ async fn main() -> shuttle_rocket::ShuttleRocket {
     let db: MongoRepo = MongoRepo::init();
     let rocket: Rocket<rocket::Build> = rocket::build()
         .manage(db)
-        .mount("/", routes![index, create_user, get_user,login]);
+        .mount("/", routes![index, create_user, get_user, login]);
     Ok(rocket.into())
 }
