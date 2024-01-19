@@ -1,3 +1,4 @@
+use crate::config::auth::{hash_password, verify_password};
 use crate::models::user_model::{User, UserFromMongo};
 use dotenv::dotenv;
 use mongodb::bson::extjson::de::Error;
@@ -27,10 +28,13 @@ impl MongoRepo {
 
     pub fn create_user(&self, new_user: User) -> Result<InsertOneResult, Error> {
         //TODO: hash password
+
+        let hashed_password: String = hash_password(new_user.password);
+
         let new_doc = UserFromMongo {
             _id: ObjectId::new(),
             username: new_user.username,
-            password: new_user.password,
+            password: hashed_password,
             email: new_user.email,
             name: new_user.name,
         };
@@ -52,12 +56,24 @@ impl MongoRepo {
     }
     pub fn login(&self, username: &str, password: &str) -> Result<UserFromMongo, Error> {
         let filter = doc! {"username": username, "password": password};
-        //TODO: check password hashing
+
         let user_detail = self
             .col
             .find_one(filter, None)
             .ok()
             .expect("Error Finding User");
+
+        // check password
+        if user_detail.is_none() {
+            //TODO: return error
+        } else {
+            let hashed_password = user_detail.as_ref().unwrap().password.clone();
+            let is_valid = verify_password(password, hashed_password.as_str());
+            if !is_valid {
+                //TODO: return error
+            }
+        }
+
         Ok(user_detail.expect("User not found"))
     }
 }
