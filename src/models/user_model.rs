@@ -9,9 +9,8 @@ pub struct User {
     pub password: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct UserFromMongo {
-    // #[serde(serialize_with = "bson::serde_helpers::serialize_object_id_as_hex_string")]
     pub _id: ObjectId,
     pub username: String,
     pub name: String,

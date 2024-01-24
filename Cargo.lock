@@ -2442,6 +2442,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "rocket-authorization"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fa2fe821919cb7646b4b46f0896874c9fd51e04b266349aef9e8f8a1bec36368"
+dependencies = [
+ "base64 0.21.7",
+ "rocket",
+ "thiserror",
+]
+
+[[package]]
 name = "rocket_codegen"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2619,6 +2630,7 @@ dependencies = [
  "mongodb",
  "pwhash",
  "rocket",
+ "rocket-authorization",
  "serde",
  "shuttle-rocket",
  "shuttle-runtime",

@@ -1,11 +1,10 @@
-use mongodb::bson::extjson::de::Error;
 use mongodb::results::InsertOneResult;
 use rocket::{get, http::Status, post, serde::json::Json, State};
 
 use crate::{
     config::jwt::create_jwt,
     models::user_model::{LoginResponse, LoginUser, User, UserFromMongo},
-    repository::mongodb_repo::MongoRepo,
+    repository::{mongodb_repo::MongoRepo, error::UserError},
 };
 
 #[post("/user", data = "<new_user>")]
@@ -41,16 +40,16 @@ pub fn get_user(db: &State<MongoRepo>, path: &str) -> Result<Json<UserFromMongo>
 #[post("/login", data = "<user>")]
 pub fn login(db: &State<MongoRepo>, user: Json<LoginUser>) -> Result<Json<LoginResponse>, Status> {
     // get user details from db
-    let user_details: Result<UserFromMongo, Error> = db.login(&user.username, &user.password);
+    let user_details: Result<UserFromMongo, UserError> = db.login(&user.username, &user.password);
+    println!("{:?}", user_details);
 
-    // if user not found return 404
-    if user_details.is_err() {
-        return Err(Status::InternalServerError);
-    } else {
-        // if user found return jwt token
-        let user: UserFromMongo = user_details.unwrap();
-        Ok(Json(LoginResponse {
-            token: create_jwt(user._id.to_hex()).unwrap(),
-        }))
+    match user_details {
+        Ok(user) => {
+            // create jwt token
+            let token = create_jwt(user._id.to_hex()).unwrap();
+            // return token
+            Ok(Json(LoginResponse { token }))
+        }
+        Err(_) => Err(Status::NotFound),
     }
 }
