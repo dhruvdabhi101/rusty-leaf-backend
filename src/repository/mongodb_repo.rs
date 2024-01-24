@@ -1,4 +1,6 @@
 use crate::config::auth::{hash_password, verify_password};
+use crate::config::jwt::decode_jwt;
+use crate::models::page_model::{Page, PageCreateRequest, PageCreateResponse};
 use crate::models::user_model::{User, UserFromMongo};
 use dotenv::dotenv;
 use mongodb::bson::extjson::de::Error;
@@ -8,9 +10,13 @@ use mongodb::{
     sync::{Client, Collection},
 };
 use std::env;
+use std::str::FromStr;
+
+use super::error::UserError;
 
 pub struct MongoRepo {
     col: Collection<UserFromMongo>,
+    page: Collection<Page>,
 }
 
 impl MongoRepo {
@@ -23,12 +29,11 @@ impl MongoRepo {
         let client = Client::with_uri_str(uri).unwrap();
         let db = client.database("rusty-leaf");
         let col: Collection<UserFromMongo> = db.collection("user");
-        MongoRepo { col }
+        let page: Collection<Page> = db.collection("page");
+        MongoRepo { col, page }
     }
 
     pub fn create_user(&self, new_user: User) -> Result<InsertOneResult, Error> {
-        //TODO: hash password
-
         let hashed_password: String = hash_password(new_user.password);
 
         let new_doc = UserFromMongo {
@@ -54,8 +59,9 @@ impl MongoRepo {
             .expect("Error Finding User");
         Ok(user_detail.expect("User not found"))
     }
-    pub fn login(&self, username: &str, password: &str) -> Result<UserFromMongo, Error> {
-        let filter = doc! {"username": username, "password": password};
+
+    pub fn login(&self, username: &str, password: &str) -> Result<UserFromMongo, UserError> {
+        let filter = doc! {"username": username};
 
         let user_detail = self
             .col
@@ -63,17 +69,50 @@ impl MongoRepo {
             .ok()
             .expect("Error Finding User");
 
-        // check password
-        if user_detail.is_none() {
-            //TODO: return error
-        } else {
-            let hashed_password = user_detail.as_ref().unwrap().password.clone();
-            let is_valid = verify_password(password, hashed_password.as_str());
-            if !is_valid {
-                //TODO: return error
-            }
-        }
 
-        Ok(user_detail.expect("User not found"))
+        if user_detail.is_some() {
+            let user: UserFromMongo = user_detail.unwrap();
+            let is_valid = verify_password(password, user.password.as_str());
+            if !is_valid {
+                return Err(UserError::InvalidPassword);
+            }
+            return Ok(user);
+        } else {
+            return Err(UserError::NotFound);
+        }
+        
+
+    }
+
+    // Page CRUD
+    pub fn create_page(&self, new_page: PageCreateRequest, token: &String) -> Result<PageCreateResponse, Error> {
+        // get user id from jwt token
+        let user_id = decode_jwt(token.as_str()).unwrap().sub;
+        // let user_obj: ObjectId = ;
+
+        let user_id = ObjectId::from_str(user_id.as_str()).unwrap();
+        // create page 
+        let page = Page {
+            _id: ObjectId::new(),
+            title: new_page.title.clone(),
+            content: new_page.content.clone(),
+            published: new_page.published.clone(),
+            slug: new_page.slug.clone(),
+            user_id: user_id.clone()
+        };
+        self
+            .page
+            .insert_one(page, None)
+            .ok()
+            .expect("Error Creating Page");
+
+        let page_response = PageCreateResponse {
+            title: new_page.title,
+            content: new_page.content,
+            published: new_page.published,
+            slug: new_page.slug,
+            user_id,
+        };
+        Ok(page_response)
     }
 }
