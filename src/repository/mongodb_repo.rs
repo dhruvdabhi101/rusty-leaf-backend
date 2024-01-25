@@ -1,4 +1,5 @@
 use crate::config::auth::{hash_password, verify_password};
+use darkdown::converter::converter::Converter;
 use crate::config::jwt::decode_jwt;
 use crate::models::page_model::{Page, PageCreateRequest, PageCreateResponse};
 use crate::models::user_model::{User, UserFromMongo};
@@ -12,7 +13,7 @@ use mongodb::{
 use std::env;
 use std::str::FromStr;
 
-use super::error::UserError;
+use super::error::{UserError, PageError};
 
 pub struct MongoRepo {
     col: Collection<UserFromMongo>,
@@ -92,10 +93,16 @@ impl MongoRepo {
 
         let user_id = ObjectId::from_str(user_id.as_str()).unwrap();
         // create page 
+
+        // convert content from darkdown to html
+
+        let darkdown_content = new_page.content.clone();
+        let html_content:String = Converter::new().convert_to_html(darkdown_content.as_str());
+
         let page = Page {
             _id: ObjectId::new(),
             title: new_page.title.clone(),
-            content: new_page.content.clone(),
+            content: html_content.clone(), 
             published: new_page.published.clone(),
             slug: new_page.slug.clone(),
             user_id: user_id.clone()
@@ -108,11 +115,35 @@ impl MongoRepo {
 
         let page_response = PageCreateResponse {
             title: new_page.title,
-            content: new_page.content,
+            content: html_content.clone(),
             published: new_page.published,
             slug: new_page.slug,
             user_id,
         };
         Ok(page_response)
     }
+
+    pub fn get_page(&self, slug: &str, username: &str) -> Result<Page, PageError> {
+        let filer = doc! { "username": username };
+        let user = self
+            .col
+            .find_one(filer, None)
+            .ok()
+            .expect("Error Finding User");
+
+        if user.is_some() {
+            let user: UserFromMongo = user.unwrap();
+            let user_id = user._id;
+            let filter = doc! {"slug": slug, "user_id": user_id};
+            let page = self
+                .page
+                .find_one(filter, None)
+                .ok()
+                .expect("Error Finding Page");
+            return Ok(page.unwrap());
+        } else {
+            return Err(PageError::NotFound);
+        }
+    }
+
 }

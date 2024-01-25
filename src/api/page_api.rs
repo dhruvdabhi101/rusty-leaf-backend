@@ -1,12 +1,9 @@
-use mongodb::bson::extjson::de::Error;
-use mongodb::results::InsertOneResult;
 use rocket::{get, http::Status, post, serde::json::Json, State};
 use rocket_authorization::oauth::OAuth;
-use rocket_authorization::{AuthError, Credential};
+use rocket_authorization::Credential;
 
-use crate::config::jwt::decode_jwt;
 use crate::{
-    models::{user_model::{LoginResponse, LoginUser, User, UserFromMongo}, page_model::{PageCreateRequest, PageCreateResponse, Page}},
+    models::page_model::{PageCreateRequest, PageCreateResponse, Page},
     repository::mongodb_repo::MongoRepo,
 };
 
@@ -27,3 +24,12 @@ pub fn create_page(auth: Credential<OAuth>, db: &State<MongoRepo>, new_page: Jso
     Ok(Json(page))
 }
 
+#[get("/get-page/<username>/<slug>")]
+pub fn get_page(db: &State<MongoRepo>, slug: &str, username: &str) -> Result<Json<Page>, Status> {
+    let page: Page = db.get_page(slug, username).unwrap();
+    if page.published == true {
+        Ok(Json(page))
+    } else {
+        Err(Status::Unauthorized)
+    }
+}

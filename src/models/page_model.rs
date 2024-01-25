@@ -27,3 +27,10 @@ pub struct PageCreateResponse {
     pub published: bool,
     pub user_id: ObjectId
 }
+
+pub struct PageGetResponse {
+    pub title: String,
+    pub content: String,
+    pub slug: String,
+    pub published: bool,
+}
