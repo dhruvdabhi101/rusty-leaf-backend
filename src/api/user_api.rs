@@ -4,7 +4,7 @@ use rocket::{get, http::Status, post, serde::json::Json, State};
 use crate::{
     config::jwt::create_jwt,
     models::user_model::{LoginResponse, LoginUser, User, UserFromMongo},
-    repository::{mongodb_repo::MongoRepo, error::UserError},
+    repository::{error::UserError, mongodb_repo::MongoRepo},
 };
 
 #[post("/user", data = "<new_user>")]
