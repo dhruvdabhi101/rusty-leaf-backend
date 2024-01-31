@@ -11,5 +11,5 @@ pub enum UserError {
 pub enum PageError {
     NotFound,
     AlreadyExists,
-    InternalError
+    InternalError,
 }
