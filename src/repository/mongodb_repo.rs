@@ -52,8 +52,9 @@ impl MongoRepo {
             .expect("Error Creating User");
         Ok(user)
     }
-    pub fn get_user(&self, username: &str) -> Result<UserFromMongo, Error> {
-        let filter = doc! {"username": username};
+    pub fn get_user(&self, id: &str) -> Result<UserFromMongo, Error> {
+        let user_id = bson::oid::ObjectId::from_str(id);
+        let filter = doc! {"_id": user_id.unwrap()};
         let user_detail = self
             .col
             .find_one(filter, None)

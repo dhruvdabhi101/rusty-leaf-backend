@@ -12,7 +12,7 @@ To run this project you need to install
 
 
 ### Currently implemented Endpoints
-- `GET /user/<username>` 
+- `GET /user/<username>`
 - `POST /user` - to create new user ( registering )
 - `POST /login` - to login into the account ( gets JWT Token back as response )
 - `POST pages/create-page` - to create page, it will require JWT Token
