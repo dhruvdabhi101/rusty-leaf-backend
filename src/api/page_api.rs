@@ -41,6 +41,11 @@ pub fn get_page(db: &State<MongoRepo>, slug: &str, username: &str) -> Result<Jso
     }
 }
 
+#[get("/get-all/<username>")]
+pub fn get_all(db: &State<MongoRepo>, username: &str) -> Result<Json<Vec<Page>>, Status> {
+    let page: Vec<Page> = db.get_pages(username).unwrap();
+    Ok(Json(page))
+}
 #[put("/update-page/<id>", data = "<new_page>")]
 pub fn update_page(
     auth: Credential<OAuth>,
@@ -74,3 +79,4 @@ pub fn delete_page(
     let page: DeleteResult = db.delete_page(id, token).unwrap();
     Ok(Json(page))
 }
+

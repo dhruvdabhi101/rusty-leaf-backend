@@ -174,7 +174,7 @@ impl MongoRepo {
         return Ok(page.unwrap());
     }
 
-    pub async fn get_pages(&self, username: &str) -> Result<Vec<Page>, PageError> {
+    pub fn get_pages(&self, username: &str) -> Result<Vec<Page>, PageError> {
         let filer = doc! { "username": username };
         let user = self
             .col
