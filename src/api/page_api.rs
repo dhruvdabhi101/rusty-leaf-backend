@@ -41,11 +41,17 @@ pub fn get_page(db: &State<MongoRepo>, slug: &str, username: &str) -> Result<Jso
     }
 }
 
-#[get("/get-all/<username>")]
-pub fn get_all(db: &State<MongoRepo>, username: &str) -> Result<Json<Vec<Page>>, Status> {
-    let page: Vec<Page> = db.get_pages(username).unwrap();
-    Ok(Json(page))
+#[get("/get-all")]
+pub fn get_all(
+    auth: Credential<OAuth>,
+    db: &State<MongoRepo>,
+) -> Result<Json<Vec<Page>>, Status> {
+    // get user from jwt token
+    let token = &auth.token;
+    let pages: Vec<Page> = db.get_pages(token).unwrap();
+    return Ok(Json(pages));
 }
+
 #[put("/update-page/<id>", data = "<new_page>")]
 pub fn update_page(
     auth: Credential<OAuth>,

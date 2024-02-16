@@ -174,34 +174,24 @@ impl MongoRepo {
         return Ok(page.unwrap());
     }
 
-    pub fn get_pages(&self, username: &str) -> Result<Vec<Page>, PageError> {
-        let filer = doc! { "username": username };
-        let user = self
-            .col
-            .find_one(filer, None)
+    pub fn get_pages(&self, token: &str) -> Result<Vec<Page>, PageError> {
+        let user_id = decode_jwt(token).unwrap().sub;
+        let user_id = ObjectId::from_str(user_id.as_str()).unwrap();
+
+        let filter = doc! {"user_id": user_id};
+        let pages = self
+            .page
+            .find(filter, None)
             .ok()
-            .expect("Error Finding User");
+            .expect("Error finding pages");
 
-        if user.is_some() {
-            let user: UserFromMongo = user.unwrap();
-            let user_id = user._id;
-            let filter = doc! {"user_id": user_id};
-            let pages = self
-                .page
-                .find(filter, None)
-                .ok()
-                .expect("Error Finding Pages");
-
-            let serial: Vec<Result<Page, mongodb::error::Error>> = pages.collect::<Vec<_>>();
-            let mut results: Vec<Page> = Vec::new();
-            for page in serial {
-                results.push(page.unwrap());
-            }
-
-            return Ok(results);
-        } else {
-            return Err(PageError::NotFound);
+        let serial: Vec<Result<Page, mongodb::error::Error>> = pages.collect::<Vec<_>>();
+        let mut results: Vec<Page> = Vec::new();
+        for page in serial {
+            results.push(page.unwrap());
         }
+
+        return Ok(results);
     }
     pub fn delete_page(&self, id: &str, token: &String) -> Result<DeleteResult, PageError> {
         let user_id = decode_jwt(token.as_str()).unwrap().sub;
