@@ -5,7 +5,7 @@ use rocket_authorization::Credential;
 
 use crate::{
     models::page_model::{
-        Page, PageCreateRequest, PageCreateResponse, PageUpdateRequest, PageUpdateResponse,
+        Page, PageCreateRequest, PageCreateResponse, PageUpdateRequest,
     },
     repository::mongodb_repo::MongoRepo,
 };
