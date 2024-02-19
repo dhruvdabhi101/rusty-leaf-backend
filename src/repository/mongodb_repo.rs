@@ -100,12 +100,11 @@ impl MongoRepo {
         // convert content from darkdown to html
 
         let darkdown_content = new_page.content.clone();
-        let html_content: String = Converter::new().convert_to_html(darkdown_content.as_str());
 
         let page = Page {
             _id: ObjectId::new(),
             title: new_page.title.clone(),
-            content: html_content.clone(),
+            content: darkdown_content.clone(),
             published: new_page.published.clone(),
             slug: new_page.slug.clone(),
             user_id: user_id.clone(),
@@ -117,7 +116,7 @@ impl MongoRepo {
 
         let page_response = PageCreateResponse {
             title: new_page.title,
-            content: html_content.clone(),
+            content: darkdown_content.clone(),
             published: new_page.published,
             slug: new_page.slug,
             user_id,
@@ -144,7 +143,8 @@ impl MongoRepo {
                 .expect("Error Finding Page");
 
             if page.is_some() {
-                let page: Page = page.unwrap();
+                let mut page: Page = page.unwrap();
+                page.content = Converter::new().convert_to_html(&page.content);
                 return Ok(page);
             } else {
                 return Err(PageError::NotFound);
