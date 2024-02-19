@@ -193,6 +193,26 @@ impl MongoRepo {
 
         return Ok(results);
     }
+
+    pub fn get_page_by_id(&self, id: &str, token: &str) -> Result<Page, PageError> {
+        let user_id = decode_jwt(token).unwrap().sub;
+        let user_id = ObjectId::from_str(user_id.as_str()).unwrap();
+        let page_id = ObjectId::from_str(id).unwrap();
+
+        let filter = doc! { "_id": page_id, "user_id": user_id };
+        let page = self
+            .page
+            .find_one(filter, None)
+            .ok()
+            .expect("Error finding page");
+
+        if let Some(page) = page {
+            Ok(page)
+        } else {
+            Err(PageError::NotFound)
+        }
+    }
+
     pub fn delete_page(&self, id: &str, token: &String) -> Result<DeleteResult, PageError> {
         let user_id = decode_jwt(token.as_str()).unwrap().sub;
         let user_id = ObjectId::from_str(user_id.as_str()).unwrap();
