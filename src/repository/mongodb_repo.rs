@@ -63,6 +63,40 @@ impl MongoRepo {
         Ok(user_detail.expect("User not found"))
     }
 
+    pub fn update_user(&self, new_user: User, token: &str) -> Result<UserFromMongo, UserError> {
+        let user_id = decode_jwt(token).unwrap().sub;
+
+        let user_id = ObjectId::from_str(user_id.as_str()).unwrap();
+
+        // get user and see if user_id matches
+        let filter = doc! {"_id": user_id};
+        let user = self
+            .col
+            .find_one(filter.clone(), None)
+            .ok()
+            .expect("Error Finding User");
+
+        if user.is_none() {
+            return Err(UserError::NotFound);
+        } else {
+            let user: UserFromMongo = user.unwrap();
+            if user._id != user_id {
+                return Err(UserError::InvalidCredentials);
+            }
+        }
+
+        let hashed_password: String = hash_password(new_user.password);
+
+        let filter = doc! {"username": new_user.username.clone()};
+        let update = doc! {"$set": {"username": new_user.username, "password": hashed_password, "email": new_user.email, "name": new_user.name}};
+        let user = self
+            .col
+            .find_one_and_update(filter, update, None)
+            .ok()
+            .expect("Error Updating User");
+        return Ok(user.unwrap());
+    }
+
     pub fn login(&self, username: &str, password: &str) -> Result<UserFromMongo, UserError> {
         let filter = doc! {"username": username};
 
