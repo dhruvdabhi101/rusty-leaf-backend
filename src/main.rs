@@ -16,6 +16,7 @@ use rocket::{
     serde::json::Json,
     Request, Response, Rocket,
 };
+use shuttle_runtime::SecretStore;
 
 #[get("/")]
 fn index() -> Result<Json<String>, Status> {
@@ -23,8 +24,12 @@ fn index() -> Result<Json<String>, Status> {
 }
 
 #[shuttle_runtime::main]
-async fn main() -> shuttle_rocket::ShuttleRocket {
-    let db: MongoRepo = MongoRepo::init();
+async fn main(#[shuttle_runtime::Secrets] secrets: SecretStore) -> shuttle_rocket::ShuttleRocket {
+    let mongouri = match secrets.get("MONGODB_URI") {
+        Some(mongouri) => mongouri,
+        None => panic!("MONGODB_URI not found"),
+    };
+    let db: MongoRepo = MongoRepo::init(mongouri);
     let rocket: Rocket<rocket::Build> = rocket::build()
         .attach(make_cors())
         .manage(db)

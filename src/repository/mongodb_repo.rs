@@ -22,12 +22,8 @@ pub struct MongoRepo {
 }
 
 impl MongoRepo {
-    pub fn init() -> Self {
-        dotenv().ok();
-        let uri = match env::var("MONGO_URI") {
-            Ok(uri) => uri,
-            Err(_) => panic!("MONGO_URI not found in .env file"),
-        };
+    pub fn init(mongouri: String) -> Self {
+        let uri = mongouri;
         let client = Client::with_uri_str(uri).unwrap();
         let db = client.database("rusty-leaf");
         let col: Collection<UserFromMongo> = db.collection("user");
